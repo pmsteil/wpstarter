@@ -11,7 +11,6 @@
 namespace WCM\WPStarter\Setup;
 
 use Composer\Composer;
-use Composer\Util\Filesystem;
 
 /**
  * @author  Giuseppe Mazzapica <giuseppe.mazzapica@gmail.com>

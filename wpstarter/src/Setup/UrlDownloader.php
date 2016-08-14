@@ -11,7 +11,6 @@
 namespace WCM\WPStarter\Setup;
 
 use Composer\Factory;
-use Composer\Util\Filesystem;
 use Composer\Util\RemoteFilesystem;
 
 /**
