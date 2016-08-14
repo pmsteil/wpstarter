@@ -33,11 +33,19 @@
         "gmazzap/gea":          "~0.1.0"
     },
     "require-dev":       {
-        "composer/composer": "^1.0"
+        "composer/composer": "^1.0",
+        "phpunit/phpunit":   "4.8.*",
+        "mockery/mockery":   "0.9.3",
+        "gmazzap/andrew":    "1.0.*"
     },
     "autoload":          {
         "psr-4": {
             "WCM\\WPStarter\\": "wpstarter/src/"
+        }
+    },
+    "autoload-dev":      {
+        "psr-4": {
+            "WCM\\WPStarter\\Tests\\": "wpstarter/tests/src/"
         }
     },
     "config":            {
