@@ -101,7 +101,7 @@ final class Config implements \ArrayAccess
         }
 
         /** @var callable $validate */
-        $validate = [$this, self::$validationMap[$name]];
+        $validate = $validateCb ?: [$this, self::$validationMap[$name]];
         $value = $validate($value);
 
         is_null($value) or $this->configs[$name] = $value;
