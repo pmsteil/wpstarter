@@ -9,17 +9,13 @@
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">./wpstarter/src</directory>
-			<exclude>
-				<directory>./wpstarter/src/tests</directory>
-				<directory>./vendor</directory>
-			</exclude>
 		</whitelist>
 	</filter>
 	<logging>
 		<log type="coverage-clover" target="./wpstarter/tests/logs/coverage.xml"/>
 	</logging>
 	<testsuites>
-		<testsuite name="U">
+		<testsuite name="Unit" phpVersion="5.5.0" phpVersionOperator=">=">
 			<directory>./wpstarter/tests/src/Unit</directory>
 		</testsuite>
 	</testsuites>
