@@ -8,13 +8,13 @@
  * file that was distributed with this source code.
  */
 
-$vendor = dirname( dirname( dirname( __FILE__ ) ) ).'/vendor/';
+$vendor = dirname( dirname( dirname( __FILE__ ) ) ).'/vendor';
 
 if ( ! realpath( $vendor ) ) {
 	die( 'Please execute Composer installation before running tests.' );
 }
 
-require_once "{$vendor}autoload.php";
-require_once "{$vendor}phpunit/phpunit/src/Framework/Assert/Functions.php";
+require_once "{$vendor}/autoload.php";
+require_once "{$vendor}/phpunit/phpunit/src/Framework/Assert/Functions.php";
 
 unset( $vendor );
