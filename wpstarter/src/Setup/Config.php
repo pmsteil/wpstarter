@@ -81,11 +81,11 @@ final class Config implements \ArrayAccess
     public function appendConfig($name, $value)
     {
         if ($this->offsetExists($name)) {
-            throw new \BadMethodCallException(
+            throw new \BadMethodCallException( sprintf(
                 "%s is append-ony: %s config is already set",
                 __CLASS__,
                 $name
-            );
+            ) );
         }
 
         if (array_key_exists($name, self::$validationMap)) {
