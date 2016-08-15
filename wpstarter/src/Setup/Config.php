@@ -74,25 +74,35 @@ final class Config implements \ArrayAccess
      *
      * Allows to use config class as a DTO among steps.
      *
-     * @param string $name
-     * @param mixed $value
+     * @param string   $name
+     * @param mixed    $value
+     * @param callable $validateCb Custom validation callback
      * @return static
      */
-    public function appendConfig($name, $value)
+    public function appendConfig( $name, $value, callable $validateCb = null )
     {
         if ($this->offsetExists($name)) {
             throw new \BadMethodCallException( sprintf(
-                "%s is append-ony: %s config is already set",
+                '%s is append-ony: "%s" config is already set',
                 __CLASS__,
                 $name
             ) );
         }
 
-        if (array_key_exists($name, self::$validationMap)) {
-            /** @var callable $validate */
-            $validate = [$this, self::$validationMap[$name]];
-            $value = $validate($validate);
+        if ( ! in_array( $name, self::$defaults ) ) {
+            if ( is_null( $validateCb ) ) {
+                throw new \BadMethodCallException( sprintf(
+                    'Validation callback for "%s" missing in %s.',
+                    $name,
+                    __CLASS__
+                ) );
+             }
+             self::$validationMap[ $name ] = $validateCb;
         }
+
+        /** @var callable $validate */
+        $validate = [$this, self::$validationMap[$name]];
+        $value = $validate($validate);
 
         is_null($value) or $this->configs[$name] = $value;
 
