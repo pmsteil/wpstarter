@@ -76,33 +76,33 @@ final class Config implements \ArrayAccess
      *
      * @param string   $name
      * @param mixed    $value
-     * @param callable $validateCb Custom validation callback
+     * @param callable $validateCb
      * @return static
      */
     public function appendConfig( $name, $value, callable $validateCb = null )
     {
         if ($this->offsetExists($name)) {
             throw new \BadMethodCallException( sprintf(
-                '%s is append-ony: "%s" config is already set',
+                "%s is append-ony: %s config is already set",
                 __CLASS__,
                 $name
             ) );
         }
 
-        if ( ! in_array( $name, self::$defaults ) ) {
+        if ( ! in_array( $name, self::$validationMap ) ) {
             if ( is_null( $validateCb ) ) {
                 throw new \BadMethodCallException( sprintf(
-                    'Validation callback for "%s" missing in %s.',
-                    $name,
-                    __CLASS__
+                    "Custom %s value %s needs a validation callback",
+                    __CLASS__,
+                    $name
                 ) );
-             }
-             self::$validationMap[ $name ] = $validateCb;
+            }
+            self::$validationMap[$name] = $validateCb;
         }
 
         /** @var callable $validate */
         $validate = [$this, self::$validationMap[$name]];
-        $value = $validate($validate);
+        $value = $validate($value);
 
         is_null($value) or $this->configs[$name] = $value;
 
