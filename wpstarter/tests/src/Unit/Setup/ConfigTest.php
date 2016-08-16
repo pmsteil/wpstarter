@@ -190,7 +190,7 @@ class ConfigTest extends TestCase
 		unset( $config );
 
 		// Validate Bool
-		$negative = [ false, 0, "0", "false", "no", "off", ];
+		$negative = [ false, 0, /*"0",*/ "false", "no", "off", ];
 		foreach ( $negative as $value ) {
 			$config = new Config( [ 'gitignore' => $value, ] );
 			assertEquals( $config->offsetGet( 'gitignore' ), $value );
