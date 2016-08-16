@@ -28,10 +28,6 @@ class ConfigTest extends TestCase
 		'unknown-dropins'       => 'ask',
 	];
 
-	public function setUp()
-	{
-	}
-
 	/**
 	 * Config values may not get changed
 	 */
@@ -142,5 +138,76 @@ class ConfigTest extends TestCase
 			'Expected Exception %s has not been raised',
 			\BadMethodCallException::class
 		) );
+	}
+
+	public function testConfigValidatesValidValues()
+	{
+		foreach ( self::$defaults as $key => $value ) {
+			$config = new Config( [ $key => $value, ] );
+			assertArrayHasKey( $key, $config );
+			assertEquals( $value, $config[ $key ] );
+		}
+	}
+
+	public function testConfigValidationRejectsInvalidValues()
+	{
+		$defaults = [
+			'gitignore'             => false,
+			'env-example'           => true,
+			'env-file'              => '.env',
+			'move-content'          => false,
+			'content-dev-op'        => 'symlink',
+			'content-dev-dir'       => 'content-dev',
+			'register-theme-folder' => true,
+			'prevent-overwrite'     => [ '.gitignore' ],
+			'dropins'               => [ ],
+			'unknown-dropins'       => 'ask',
+		];
+
+		$config = new Config( [ 'gitignore' => true, ] );
+		assertTrue( $config['gitignore'] );
+		unset( $config );
+
+		// Validate Ask with 'ask' aliasing
+		foreach ( ['ask', 'prompt', 'query', 'interrogate', 'demand'] as $val ) {
+			$config = new Config( [ 'gitignore' => $val, ] );
+			assertEquals( $config['gitignore'], 'ask' );
+		}
+		unset( $config );
+
+		// Validate Url
+		$ignoreUrl = 'http://example.com?foo=bar';
+		$config = new Config( [ 'gitignore' => $ignoreUrl, ] );
+		assertEquals( $config['gitignore'], $ignoreUrl );
+		unset( $config, $ignoreUrl );
+
+		// Do not move content when there is a theme folder registered
+		$config = new Config( [
+			'register-theme-folder' => true,
+			'move-content'          => true,
+		] );
+		assertFalse( $config['move-content'] );
+		unset( $config );
+
+		// Validate Bool
+		$negative = [ false, 0, "0", "false", "no", "off", ];
+		foreach ( $negative as $value ) {
+			$config = new Config( [ 'gitignore' => $value, ] );
+			assertEquals( $config->offsetGet( 'gitignore' ), $value );
+		}
+		unset( $config, $negative );
+
+		$positive = [ true,  1, "1", "true", "yes", "on", ];
+		foreach ( $positive as $value ) {
+			$config = new Config( [ 'gitignore' => $value, ] );
+			assertEquals( $config->offsetGet( 'gitignore' ), $value );
+		}
+		unset( $config, $positive );
+
+		# $-_.+!*'(),{}|\\^~[]`"><#%;/?:@&=
+
+		#$config = new Config( [ 'gitignore' => '<?php foo', ] );
+		#var_dump( $config['gitignore'] );
+		#assertFalse( $config['gitignore'] );
 	}
 }
