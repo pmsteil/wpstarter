@@ -87,6 +87,28 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * When 'register-theme-folder' is true, 'move-content' must always be enforced to false.
+     */
+    public function testMoveContentAlwaysFalseWhenRegisterThemeFolder()
+    {
+        $config = new Config(['move-content' => true, 'register-theme-folder' => true]);
+        assertFalse($config['move-content']);
+        assertTrue($config['register-theme-folder']);
+
+        $config = new Config(['move-content' => true, 'register-theme-folder' => false]);
+        assertTrue($config['move-content']);
+        assertFalse($config['register-theme-folder']);
+
+        $config = new Config(['move-content' => false, 'register-theme-folder' => false]);
+        assertFalse($config['move-content']);
+        assertFalse($config['register-theme-folder']);
+
+        $config = new Config(['move-content' => false, 'register-theme-folder' => true]);
+        assertFalse($config['move-content']);
+        assertTrue($config['register-theme-folder']);
+    }
+
+    /**
      * When `gitignore` is an array, it only accepts boolean for defaults settings
      * and only accepts strings for "custom" entries
      */
