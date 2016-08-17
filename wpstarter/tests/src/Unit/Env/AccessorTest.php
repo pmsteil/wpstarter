@@ -14,7 +14,6 @@ namespace WCM\WPStarter\Tests\Env;
 use WCM\WPStarter\Tests\TestCase;
 use WCM\WPStarter\Env\Accessor;
 use Gea\Accessor\AccessorInterface;
-use Gea\Exception\ReadOnlyWriteException;
 
 class AccessorTest extends TestCase
 {
@@ -25,39 +24,22 @@ class AccessorTest extends TestCase
         assertInstanceOf(AccessorInterface::class, $accessor);
     }
 
+    /**
+     * @expectedException \Gea\Exception\ReadOnlyWriteException
+     */
     public function testWrite()
     {
         $accessor = new Accessor();
-
         $_ENV['FOO'] = 'bar';
-        try {
-            $accessor->write('FOO', 'nope');
-        } catch (\Exception $e) {
-            assertInstanceOf(ReadOnlyWriteException::class, $e);
-            return;
-        }
-
-        $this->fail(sprintf(
-            'Expected Exception %s has not been raised',
-            ReadOnlyWriteException::class
-        ));
+        $accessor->write('FOO', 'nope');
     }
 
+    /**
+     * @expectedException \Gea\Exception\ReadOnlyWriteException
+     */
     public function testDiscard()
     {
         $accessor = new Accessor();
-
-        $_ENV['FOO'] = 'bar';
-        try {
-            $accessor->discard('FOO');
-        } catch (\Exception $e) {
-            assertInstanceOf(ReadOnlyWriteException::class, $e);
-            return;
-        }
-
-        $this->fail(sprintf(
-            'Expected Exception %s has not been raised',
-            ReadOnlyWriteException::class
-        ));
+        $accessor->discard('FOO');
     }
 }
