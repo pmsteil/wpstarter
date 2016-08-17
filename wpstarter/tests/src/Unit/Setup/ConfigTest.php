@@ -47,8 +47,8 @@ class ConfigTest extends TestCase
     public function testConfigIsLocked()
     {
         $config = new Config($this->defaults);
-        assertArrayHasKey(array_rand($this->defaults), $config);
-        unset($config['key']);
+        $key = array_rand($this->defaults);
+        unset($config[$key]);
     }
 
     /**
@@ -133,6 +133,7 @@ class ConfigTest extends TestCase
 
     /**
      * Verbosity can only be a integer between 0 and 2 (included) or null
+     *
      * @dataProvider verbosityTestData
      * @param mixed $argument
      * @param int|null $expected
@@ -165,6 +166,7 @@ class ConfigTest extends TestCase
 
     /**
      * Paths are sanitized with normalized slashes
+     *
      * @dataProvider pathArrayTestData
      */
     public function testValidatePath()
@@ -174,6 +176,8 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Paths are sanitized with normalized slashes
+     *
      * @dataProvider pathArrayTestData
      * @param mixed $argument
      * @param array $expected
@@ -185,24 +189,31 @@ class ConfigTest extends TestCase
         assertSame(array_values($expected), array_values($config['dropins']));
     }
 
+    /**
+     * @return array
+     */
     public function pathArrayTestData()
     {
         return [
+            // not arrays, skipped and valus is empty array
             ['foo', []],
             // not arrays, skipped and valus is empty array
             [1, []],
             // not arrays, skipped and valus is empty array
             [true, []],
-            // not arrays, skipped and valus is empty array
+            // empty array stay empty array
             [[], []],
-            [['foo\bar\baz\meh\foo', 'foo/bar/baz/meh/foo'], ['foo/bar/baz/meh/foo']],
             // unique...
+            [['foo\bar\baz\meh\foo', 'foo/bar/baz/meh/foo'], ['foo/bar/baz/meh/foo']],
+            // not strings are skipped
             [[1, 2, 'foo/bar/baz/meh/foo', '\meh'], ['foo/bar/baz/meh/foo', '/meh']],
-            // not string skipped
         ];
     }
 
     /**
+     * Booleans-alike treated as booleans, "ask" can be used with synonimous and case insenstitive
+     * URLs are sanitized
+     *
      * @dataProvider boolAskUrlTestData
      * @param $argument
      * @param $expected
@@ -231,11 +242,11 @@ class ConfigTest extends TestCase
             ["no", false], // booleans-alike stay booleans
             ["on", true], // booleans-alike stay booleans
             ["off", false], // booleans-alike stay booleans
-            ['ask', 'ask'], // ask-alike, are "ask"
-            ['prompt', 'ask'], // ask-alike, are "ask"
-            ['query', 'ask'], // ask-alike, are "ask"
-            ['interrogate', 'ask'], // ask-alike, are "ask"
-            ['demand', 'ask'], // ask-alike, are "ask"
+            ['ASK', 'ask'], // ask-alike, are "ask"
+            ['Prompt', 'ask'], // ask-alike, are "ask"
+            ['querY', 'ask'], // ask-alike, are "ask"
+            ['intErrogatE', 'ask'], // ask-alike, are "ask"
+            ['deMAnd', 'ask'], // ask-alike, are "ask"
             [12, null], // strange things, are null
             [[], null], // strange things, are null
             [new \stdClass(), null], // strange things, are null
@@ -244,6 +255,8 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Booleans-alike treated as booleans, "ask" can be used with synonimous and case insenstitive
+     *
      * @dataProvider boolAskTestData
      * @param mixed $argument
      * @param bool|string $expected
@@ -285,6 +298,8 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Custom steps are only accepted as array of classes implementing `StepInterface`
+     *
      * @dataProvider stepsTestData
      * @param mixed $argument
      * @param array|null $expected
@@ -315,6 +330,9 @@ class ConfigTest extends TestCase
     }
 
     /**
+     * Custom steps are only accepted as array where keys start with `pre-` or `post`
+     * and each value can be a callable or an array of callbles
+     *
      * @dataProvider stepsScriptData
      * @param mixed $argument
      * @param array|null $expected
@@ -344,13 +362,18 @@ class ConfigTest extends TestCase
                 ['pre-foo' => ['is_string'], 'post-foo' => ['is_int']], // each script name always has array of scripts
             ],
             [
-                ['pre-foo' => ['is_string', 'is_int', 'is_bool']],
+                ['pre-foo' => ['is_string', 'is_int', 'is_bool', 'foo', 'bar']], // non callbles are skipped
                 ['pre-foo' => ['is_string', 'is_int', 'is_bool']], // each script name always has array of scripts
             ]
         ];
     }
 
     /**
+     * Dev operation can only be accepted as
+     * - one of "copy" or "symlink" (case insensitive)
+     * - "ask" or synonymous (case insensitive)
+     * - booleans or boolean-alike
+     *
      * @dataProvider devOperationScriptData
      * @param mixed $argument
      * @param array|null $expected
