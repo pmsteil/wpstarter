@@ -13,3 +13,4 @@ wpstarter/tests/logs/
 website/
 couscous-theme/
 /couscous.*
+phpunit.xml
