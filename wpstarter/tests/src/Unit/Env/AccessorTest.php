@@ -18,48 +18,46 @@ use Gea\Exception\ReadOnlyWriteException;
 
 class AccessorTest extends TestCase
 {
-	public function testRead()
-	{
-		$accessor = new Accessor();
+    public function testRead()
+    {
+        $accessor = new Accessor();
 
-		assertInstanceOf( AccessorInterface::class, $accessor );
-	}
+        assertInstanceOf(AccessorInterface::class, $accessor);
+    }
 
-	public function testWrite()
-	{
-		$accessor = new Accessor();
+    public function testWrite()
+    {
+        $accessor = new Accessor();
 
-		$_ENV['FOO'] = 'bar';
-		try {
-			$accessor->write( 'FOO', 'nope' );
-		}
-		catch( \Exception $e ) {
-			assertInstanceOf( ReadOnlyWriteException::class, $e );
-			return;
-		}
+        $_ENV['FOO'] = 'bar';
+        try {
+            $accessor->write('FOO', 'nope');
+        } catch (\Exception $e) {
+            assertInstanceOf(ReadOnlyWriteException::class, $e);
+            return;
+        }
 
-		$this->fail( sprintf(
-			'Expected Exception %s has not been raised',
-			ReadOnlyWriteException::class
-		) );
-	}
+        $this->fail(sprintf(
+            'Expected Exception %s has not been raised',
+            ReadOnlyWriteException::class
+        ));
+    }
 
-	public function testDiscard()
-	{
-		$accessor = new Accessor();
+    public function testDiscard()
+    {
+        $accessor = new Accessor();
 
-		$_ENV['FOO'] = 'bar';
-		try {
-			$accessor->discard( 'FOO' );
-		}
-		catch( \Exception $e ) {
-			assertInstanceOf( ReadOnlyWriteException::class, $e );
-			return;
-		}
+        $_ENV['FOO'] = 'bar';
+        try {
+            $accessor->discard('FOO');
+        } catch (\Exception $e) {
+            assertInstanceOf(ReadOnlyWriteException::class, $e);
+            return;
+        }
 
-		$this->fail( sprintf(
-			'Expected Exception %s has not been raised',
-			ReadOnlyWriteException::class
-		) );
-	}
+        $this->fail(sprintf(
+            'Expected Exception %s has not been raised',
+            ReadOnlyWriteException::class
+        ));
+    }
 }

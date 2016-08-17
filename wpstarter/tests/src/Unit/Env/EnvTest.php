@@ -15,5 +15,4 @@ use WCM\WPStarter\Env\Env;
 
 class EnvTest
 {
-
 }
