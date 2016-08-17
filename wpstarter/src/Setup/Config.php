@@ -23,35 +23,35 @@ final class Config implements \ArrayAccess
      * @var array
      */
     private static $defaults = [
-        'gitignore' => true,
-        'env-example' => true,
-        'env-file' => '.env',
-        'move-content' => false,
-        'content-dev-op' => 'symlink',
-        'content-dev-dir' => 'content-dev',
+        'gitignore'             => true,
+        'env-example'           => true,
+        'env-file'              => '.env',
+        'move-content'          => false,
+        'content-dev-op'        => 'symlink',
+        'content-dev-dir'       => 'content-dev',
         'register-theme-folder' => true,
-        'prevent-overwrite' => ['.gitignore'],
-        'dropins' => [],
-        'unknown-dropins' => 'ask',
+        'prevent-overwrite'     => ['.gitignore'],
+        'dropins'               => [],
+        'unknown-dropins'       => 'ask',
     ];
 
     /**
      * @var array
      */
     private static $validationMap = [
-        'gitignore' => 'validateGitignore',
-        'env-example' => 'validateBoolOrAskOrUrl',
-        'env-file' => 'validatePath',
+        'gitignore'             => 'validateGitignore',
+        'env-example'           => 'validateBoolOrAskOrUrl',
+        'env-file'              => 'validatePath',
         'register-theme-folder' => 'validateBoolOrAsk',
-        'move-content' => 'validateBoolOrAsk',
-        'content-dev-dir' => 'validatePath',
-        'content-dev-op' => 'validateContentDevOperation',
-        'dropins' => 'validatePathArray',
-        'unknown-dropins' => 'validateBoolOrAsk',
-        'prevent-overwrite' => 'validateOverwrite',
-        'verbosity' => 'validateVerbosity',
-        'custom-steps' => 'validateSteps',
-        'scripts' => 'validateScripts'
+        'move-content'          => 'validateBoolOrAsk',
+        'content-dev-dir'       => 'validatePath',
+        'content-dev-op'        => 'validateContentDevOperation',
+        'dropins'               => 'validatePathArray',
+        'unknown-dropins'       => 'validateBoolOrAsk',
+        'prevent-overwrite'     => 'validateOverwrite',
+        'verbosity'             => 'validateVerbosity',
+        'custom-steps'          => 'validateSteps',
+        'scripts'               => 'validateScripts'
     ];
 
     /**
@@ -74,28 +74,28 @@ final class Config implements \ArrayAccess
      *
      * Allows to use config class as a DTO among steps.
      *
-     * @param string   $name
-     * @param mixed    $value
+     * @param string $name
+     * @param mixed $value
      * @param callable $validateCb
      * @return static
      */
-    public function appendConfig( $name, $value, callable $validateCb = null )
+    public function appendConfig($name, $value, callable $validateCb = null)
     {
         if ($this->offsetExists($name)) {
-            throw new \BadMethodCallException( sprintf(
+            throw new \BadMethodCallException(sprintf(
                 "%s is append-ony: %s config is already set",
                 __CLASS__,
                 $name
-            ) );
+            ));
         }
 
-        if ( ! in_array( $name, self::$validationMap ) ) {
-            if ( is_null( $validateCb ) ) {
-                throw new \BadMethodCallException( sprintf(
+        if (!in_array($name, self::$validationMap)) {
+            if (is_null($validateCb)) {
+                throw new \BadMethodCallException(sprintf(
                     "Custom %s value %s needs a validation callback",
                     __CLASS__,
                     $name
-                ) );
+                ));
             }
             self::$validationMap[$name] = $validateCb;
         }
@@ -156,10 +156,10 @@ final class Config implements \ArrayAccess
                 ? array_filter($value['custom'], 'is_string')
                 : [];
             $default = [
-                'wp' => true,
+                'wp'         => true,
                 'wp-content' => true,
-                'vendor' => true,
-                'common' => true,
+                'vendor'     => true,
+                'common'     => true,
             ];
             foreach ($value as $k => $v) {
                 if (array_key_exists($k, $default) && $this->validateBool($v) === false) {
@@ -195,7 +195,7 @@ final class Config implements \ArrayAccess
      */
     private function validateVerbosity($value)
     {
-        $int = (int)$this->validateInt($value);
+        $int = $this->validateInt($value);
 
         return $int >= 0 && $int < 3 ? $int : null;
     }
@@ -206,7 +206,9 @@ final class Config implements \ArrayAccess
      */
     private function validatePath($value)
     {
-        $path = filter_var(str_replace('\\', '/', $value), FILTER_SANITIZE_URL);
+        $path = is_string($value)
+            ? filter_var(str_replace('\\', '/', $value), FILTER_SANITIZE_URL)
+            : null;
 
         return $path ?: null;
     }
@@ -218,11 +220,7 @@ final class Config implements \ArrayAccess
     private function validatePathArray($value)
     {
         if (is_array($value)) {
-            array_walk($value, function (&$path) {
-                $path = $this->validatePath($path);
-            });
-
-            return array_unique(array_filter($value));
+            return array_unique(array_filter(array_map([$this, 'validatePath'], $value)));
         }
 
         return [];
@@ -234,14 +232,18 @@ final class Config implements \ArrayAccess
      */
     private function validateBoolOrAskOrUrl($value)
     {
-        $ask = $this->validateBoolOrAsk($value);
-        if ($ask === 'ask') {
-            return 'ask';
-        } elseif (is_string($value)) {
-            return $this->validateUrl(trim(strtolower($value)));
+        $booleans = [true, false, 1, 0, "true", "false", "1", "0", "yes", "no", "on", "off"];
+        if (in_array($value, $booleans, true)) {
+            return $this->validateBool($value);
         }
 
-        return $ask;
+        $ask = $this->validateBoolOrAsk($value);
+        if ($ask === 'ask') {
+            return $ask;
+        }
+
+
+        return $this->validateUrl($value);
     }
 
     /**
@@ -251,7 +253,7 @@ final class Config implements \ArrayAccess
     private function validateBoolOrAsk($value)
     {
         $asks = ['ask', 'prompt', 'query', 'interrogate', 'demand'];
-        if (in_array(trim(strtolower($value)), $asks, true)) {
+        if (is_string($value) && in_array(trim(strtolower($value)), $asks, true)) {
             return 'ask';
         }
 
@@ -264,6 +266,10 @@ final class Config implements \ArrayAccess
      */
     private function validateUrl($value)
     {
+        if (!is_string($value)) {
+            return null;
+        }
+
         return filter_var($value, FILTER_SANITIZE_URL) ?: null;
     }
 
@@ -281,8 +287,8 @@ final class Config implements \ArrayAccess
 
         $steps = [];
         foreach ($value as $name => $step) {
-            if (is_string($step)) {
-                $step = trim($step);
+            is_string($step) and $step = trim($step);
+            if (is_string($step) && class_exists($step)) {
                 is_subclass_of($step, $interface, true) and $steps[trim($name)] = $step;
             }
         }
@@ -327,12 +333,17 @@ final class Config implements \ArrayAccess
     {
         is_string($value) and $value = trim(strtolower($value));
 
-        if (in_array($value, ['symlink', 'copy', 'ask'], true)) {
+        if (in_array($value, ['symlink', 'copy'], true)) {
             return $value;
         }
 
+        $ask = $this->validateBoolOrAsk($value);
+        if ($ask === 'ask') {
+            return $ask;
+        }
+
         $bool = $this->validateBool($value);
-        ($bool === true) and $bool = null; // when true we return null to force default
+        ($bool === true || is_null($bool)) and $bool = null; // when true we return null to force default
 
         return $bool;
     }
@@ -344,11 +355,12 @@ final class Config implements \ArrayAccess
     private function validateBool($value)
     {
         $booleans = [true, false, 1, 0, "true", "false", "1", "0", "yes", "no", "on", "off"];
-        if (in_array(is_string($value) ? strtolower($value) : $value, $booleans, true)) {
-            return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        is_string($value) and $value = strtolower($value);
+        if (in_array($value, $booleans, true)) {
+            return (bool)filter_var($value, FILTER_VALIDATE_BOOLEAN);
         }
 
-        return false;
+        return null;
     }
 
     /**
