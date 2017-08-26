@@ -33,8 +33,9 @@
     ],
     "require": {
         "php": ">=5.3.2",
-        "vlucas/phpdotenv": "~2.0",
-        "johnpbloch/wordpress": ">=4.2"
+        "vlucas/phpdotenv": "~2.0"
+        ,"johnpbloch/wordpress": ">=4.2"
+        ,"wppackagist/server-ip-memory-usage": ">=4.2"
     },
     "replace": {
         "wecodemore/wp-composer-config": "*"
